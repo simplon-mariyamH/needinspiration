@@ -41,7 +41,7 @@ class DefaultController extends Controller
             if ($eleve === null)
             {
                 $echec = array('server' => 'echec');
-                return json_encode($echec);
+                return new Response(json_encode($echec));
             } else {
                 $user = [];
                 foreach ($eleve as $key=>$value) {
