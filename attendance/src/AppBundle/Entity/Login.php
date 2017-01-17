@@ -19,28 +19,35 @@ class Login
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    public $id;
 
     /**
      * @var string
      *
      * @ORM\Column(name="nom", type="string", length=255)
      */
-    private $nom;
+    public $nom;
 
     /**
      * @var string
      *
      * @ORM\Column(name="prenom", type="string", length=255)
      */
-    private $prenom;
+    public $prenom;
 
     /**
-     * @var int
+     * @var string
      *
-     * @ORM\Column(name="motdepasse", type="integer")
+     * @ORM\Column(name="motdepasse", type="string")
      */
-    private $motdepasse;
+    public $motdepasse;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="email", type="string")
+     */
+    public $email;
 
 
     /**
@@ -104,7 +111,7 @@ class Login
     /**
      * Set motdepasse
      *
-     * @param integer $motdepasse
+     * @param string $motdepasse
      *
      * @return Login
      */
@@ -118,11 +125,34 @@ class Login
     /**
      * Get motdepasse
      *
-     * @return int
+     * @return string
      */
     public function getMotdepasse()
     {
         return $this->motdepasse;
+    }
+      /**
+     * Set email
+     *
+     * @param string $email
+     *
+     * @return Login
+     */
+    public function setEmail($email)
+    {
+        $this->nom = $email;
+
+        return $this;
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
     }
 }
 
