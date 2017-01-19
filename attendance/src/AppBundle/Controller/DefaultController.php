@@ -5,8 +5,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-
-
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -53,23 +51,23 @@ class DefaultController extends Controller
                     "server"=>"success", 
                     "user"=>$user];
                 return new Response(json_encode($response));
-                // METTRE SERIALIZER DANS USER ET CREE UNE FONCTION OBJECT TO JSON
+               
+                
+                // METTRE SERIALIZER DANS USER ET CREE UNE FONCTION OBJECT TO JSON $this=>objectToJson
                 // $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
                 // $json = $serializer->serialize($eleve, 'json');
-                
-                /*
-                $response = json_encode(["server" => 'success']);
-                echo $response;
-                return new Response($json);
-                */
               }
             } else {
                 return new Response("email ou mot de passe manquant");
             }      
         } 
-       
-
     }
+    // public function objectToJson($object)
+    // {
+    //     $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
+    //     $json = $serializer->serialize($object, 'json', ['json_encode_options' => JSON_UNESCAPED_SLASHES]);
+    //     return $json;
+    // }
        /**
      * @Route("/Signin", name="Signin")
      */
@@ -86,6 +84,8 @@ class DefaultController extends Controller
                 );
                 if(isset($eleve))
                 {
+                $time = date('H:i:s \O\n d/m/Y');
+                $signedIn = $this->alreadySignedInOrNot($id);
                     return new Response("eleve existant");
                 } else {
                     return new Response("élève inconnu");
@@ -98,8 +98,16 @@ class DefaultController extends Controller
         }
 
 
-        return new Response();
      } 
+     public function alreadySignedInOrNot(integer $id) 
+     {
+        $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
+        $currentTime = date('H:i:s \O\n d/m/Y')
+        $check = $repository->findBy(
+            array("date" => )
+        );
+
+     }
      private function getEntities( $entityType ):array
     {
         $entityManager = $this->getDoctrine()->getManager();
