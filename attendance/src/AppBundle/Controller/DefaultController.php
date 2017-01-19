@@ -53,15 +53,13 @@ class DefaultController extends Controller
                 return new Response(json_encode($response));
                
                 
-                // METTRE SERIALIZER DANS USER ET CREE UNE FONCTION OBJECT TO JSON $this=>objectToJson
-                // $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
-                // $json = $serializer->serialize($eleve, 'json');
               }
             } else {
                 return new Response("email ou mot de passe manquant");
             }      
         } 
     }
+    // TODO METTRE SERIALIZER DANS USER ET CREE UNE FONCTION OBJECT TO JSON $this=>objectToJson
     // public function objectToJson($object)
     // {
     //     $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
@@ -84,9 +82,8 @@ class DefaultController extends Controller
                 );
                 if(isset($eleve))
                 {
-                $time = date('H:i:s \O\n d/m/Y');
                 $signedIn = $this->alreadySignedInOrNot($id);
-                    return new Response("eleve existant");
+                    return new Response($signedIn);
                 } else {
                     return new Response("élève inconnu");
                 }
@@ -99,13 +96,30 @@ class DefaultController extends Controller
 
 
      } 
-     public function alreadySignedInOrNot(integer $id) 
+     public function alreadySignedInOrNot( $id) 
      {
         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
-        $currentTime = date('H:i:s \O\n d/m/Y')
-        $check = $repository->findBy(
-            array("date" => )
+        $now = new \DateTime('now');
+        var_dump($now);
+        $currentDate = new \DateTime( $now->format('Y-m-d').' 00:00:00.000000');
+        $checkDate = $repository->findby(
+            array("date"=>$currentDate,
+                  "id"=>$id)
         );
+        if (isset($checkDate)){
+            $PmOrAm = $this->PmOrAm();
+             var_dump($PmOrAm);
+            echo 'cette date existe déjà';
+            
+        }
+     }
+     public function PmOrAm()
+     {
+         if (date('Hi') < 12) {
+            return  $AM = true;
+         } else {
+             return $AM = false;
+         }
 
      }
      private function getEntities( $entityType ):array
