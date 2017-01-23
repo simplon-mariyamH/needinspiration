@@ -22,6 +22,13 @@ class Signin
     private $id;
 
     /**
+     * @var int
+     *
+     * @ORM\Column(name="id_users", type="integer", unique=true)
+     */
+    private $idUsers;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="datetime")
@@ -42,15 +49,28 @@ class Signin
      */
     private $apresMidi;
 
+    /**
+     * Set idUsers
+     *
+     * @param integer $idUsers
+     *
+     * @return Signin
+     */
+    public function setIdUsers($idUsers)
+    {
+        $this->idUsers = $idUsers;
+
+        return $this;
+    }
 
     /**
-     * Get id
+     * Get idUsers
      *
      * @return int
      */
-    public function getId()
+    public function getIdUsers()
     {
-        return $this->id;
+        return $this->idUsers;
     }
 
     /**
