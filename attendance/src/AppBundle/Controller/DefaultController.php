@@ -105,17 +105,15 @@ class DefaultController extends Controller
         $currentDate = new \DateTime( $now->format('Y-m-d').' 00:00:00.000000');
         $checkDate = $repository->findby(
             array("date"=>$currentDate,
-                  "id"=>$id)
+                  "idUsers"=>$id)
         );
-        if (isset($checkDate) && count($checkDate) >= 1){
-            // var_dump($checkDate);
+        if (count($checkDate)>= 1 && $checkDate != null){
+            
             $PmOrAm = $this->PmOrAm();
-            return $this->updateDataBase($PmOrAm, $checkDate);
+            $response = $this->updateDataBase($PmOrAm, $checkDate);
             
             
         } else {
-            echo ' cette date n\'existe pas';
-            var_dump($checkDate);
             $PmOrAm = $this->PmOrAm();
             $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
             $eleve = $repository->findOneBy(
@@ -123,8 +121,12 @@ class DefaultController extends Controller
             );
             // function insert base de données la date presente.
             $this->pushToDB($PmOrAm, $eleve, $currentDate);
-            var_dump($checkDate);
+            $response =  ["server"=>"success",
+                          "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
+                         ];
+
         }
+        return $response;
      }
      public function PmOrAm()
      {
@@ -148,43 +150,42 @@ class DefaultController extends Controller
               if ($AM['matin'] != 1){
               $date[0]->setMatin(1);
               $em->flush();
-              $response = ["server"=>"echec",
+              $message = ["server"=>"success",
                           "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
                          ];  
-              return json_encode($response,JSON_UNESCAPED_UNICODE);           
+              $response = json_encode($message,JSON_UNESCAPED_UNICODE);           
              } else { 
-             $response = ["server"=>"echec",
+             $message = ["server"=>"echec",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." matin, Merci."
                          ];               
-            return json_encode($response,JSON_UNESCAPED_UNICODE);
+            $response = json_encode($message,JSON_UNESCAPED_UNICODE);
            }
          } 
          if ($time === false){ //apres midi
             if($PM['apresmidi'] != 1){
             $date[0]->setApresMidi(1);
             $em->flush();
-            $response = ["server"=>"echec",
+            $message = ["server"=>"success",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
                          ];
-            return json_encode($response,JSON_UNESCAPED_UNICODE);
+            $response = json_encode($message,JSON_UNESCAPED_UNICODE);
             } else {
-             $response = ["server"=>"echec",
+             $message = ["server"=>"echec",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
                          ];
-            return json_encode($response, JSON_UNESCAPED_UNICODE);
+            $response = json_encode($message, JSON_UNESCAPED_UNICODE);
            }
         }
+        return $response;
      }
      public function pushToDB($time, $infoEleve, $currentDate)
      {
-         var_dump($currentDate);
          $eleveID = $infoEleve->id;
          $signIn = new Signin();
-         $signIn->getId($eleveID);
+         $signIn->setIdUsers($eleveID);
          $signIn->setDate($currentDate);
          if($time === true) 
          {
-
             $signIn->setMatin(1);
             $signIn->setApresMidi(0);
                
