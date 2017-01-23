@@ -55,7 +55,8 @@ class DefaultController extends Controller
                 
               }
             } else {
-                return new Response("email ou mot de passe manquant");
+                $response = [ "server"=>"echec"];
+                return new Response(json_encode($response));
             }      
         } 
     }
@@ -100,27 +101,33 @@ class DefaultController extends Controller
      {
         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
         $now = new \DateTime('now');
-        var_dump($now);
         $currentDate = new \DateTime( $now->format('Y-m-d').' 00:00:00.000000');
         $checkDate = $repository->findby(
             array("date"=>$currentDate,
                   "id"=>$id)
         );
-        if (isset($checkDate)){
+        if (isset($checkDate) && count($checkDate) >= 1){
+            var_dump($checkDate);
             $PmOrAm = $this->PmOrAm();
-             var_dump($PmOrAm);
+            $this->updateDataBase($PmOrAm);
             echo 'cette date existe déjà';
             
+        } else {
+            echo 'cette date n\'existe pas';
         }
      }
      public function PmOrAm()
      {
-         if (date('Hi') < 12) {
+         if (date('H') < 12) {
             return  $AM = true;
          } else {
              return $AM = false;
          }
 
+     }
+     public function updateDataBase($time)
+     {
+         var_dump($time);
      }
      private function getEntities( $entityType ):array
     {
