@@ -185,20 +185,5 @@ class Login
     {
         return $this->id;
     }
-
-    /**
-     * Set id
-     *
-     * @param int $id
-     *
-     * @return Login
-     */
-    public function setId($id)
-    {
-        $this->id = $id;
-
-        return $id;
-    }
-
 }
 
