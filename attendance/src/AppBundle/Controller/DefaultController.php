@@ -107,13 +107,13 @@ class DefaultController extends Controller
                   "id"=>$id)
         );
         if (isset($checkDate) && count($checkDate) >= 1){
-            var_dump($checkDate);
+            // var_dump($checkDate);
             $PmOrAm = $this->PmOrAm();
-            $this->updateDataBase($PmOrAm);
-            echo 'cette date existe déjà';
+            $this->updateDataBase($PmOrAm, $checkDate);
+            echo ' cette date existe déjà';
             
         } else {
-            echo 'cette date n\'existe pas';
+            echo ' cette date n\'existe pas';
         }
      }
      public function PmOrAm()
@@ -125,9 +125,25 @@ class DefaultController extends Controller
          }
 
      }
-     public function updateDataBase($time)
-     {
-         var_dump($time);
+     public function updateDataBase($time, $date)
+     {   
+         $em = $this->getDoctrine()->getManager();
+         $AM = ['matin' => $date[0]->getMatin()];
+         $PM = ['apresmidi' => $date[0]->getApresMidi()];
+         var_dump($time); // si matin $time = true, si apres midi $time = false
+         if ($time === true && $AM['matin'] != 1) // matin 
+         {  
+              $date->setMatin(1);
+              $em->flush();            
+         } else { 
+             echo 'déjà inscrit pour ce matin';
+         } 
+         if ($time === false && $PM['apresmidi'] != 1){ //apres midi
+            $date->setApresMidi(1);
+            $em->flush();
+         } else {
+             echo 'déjà inscrit pour cette après midi';
+         }
      }
      private function getEntities( $entityType ):array
     {
