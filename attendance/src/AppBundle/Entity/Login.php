@@ -49,13 +49,16 @@ class Login
      */
     public $email;
 
+
     /**
-     * @ORM\Column(name="published", type="boolean")
+     * Get id
+     *
+     * @return int
      */
-    public $published = true;
-
-
-    
+    public function getId()
+    {
+        return $this->id;
+    }
 
     /**
      * Set nom
@@ -150,40 +153,6 @@ class Login
     public function getEmail()
     {
         return $this->email;
-    }
-
-    /**
-     * Set published
-     *
-     * @param boolean $published
-     *
-     * @return Login
-     */
-    public function setPublished($published)
-    {
-        $this->published = $published;
-
-        return $this;
-    }
-
-    /**
-     * Get published
-     *
-     * @return boolean
-     */
-    public function getPublished()
-    {
-        return $this->published;
-    }
-
-    /**
-     * Get id
-     *
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
     }
 }
 
