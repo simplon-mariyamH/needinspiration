@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Controller;
 use AppBundle\Entity\Login;
+use AppBundle\Entity\Signin;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -109,11 +110,20 @@ class DefaultController extends Controller
         if (isset($checkDate) && count($checkDate) >= 1){
             // var_dump($checkDate);
             $PmOrAm = $this->PmOrAm();
-            $this->updateDataBase($PmOrAm, $checkDate);
-            echo ' cette date existe déjà';
+            return $this->updateDataBase($PmOrAm, $checkDate);
+            
             
         } else {
             echo ' cette date n\'existe pas';
+            var_dump($checkDate);
+            $PmOrAm = $this->PmOrAm();
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
+            $eleve = $repository->findOneBy(
+                array("id"=>$id)
+            );
+            // function insert base de données la date presente.
+            $this->pushToDB($PmOrAm, $eleve, $currentDate);
+            var_dump($checkDate);
         }
      }
      public function PmOrAm()
@@ -127,23 +137,64 @@ class DefaultController extends Controller
      }
      public function updateDataBase($time, $date)
      {   
+         setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
          $em = $this->getDoctrine()->getManager();
          $AM = ['matin' => $date[0]->getMatin()];
          $PM = ['apresmidi' => $date[0]->getApresMidi()];
-         var_dump($time); // si matin $time = true, si apres midi $time = false
-         if ($time === true && $AM['matin'] != 1) // matin 
+         $dateNow = strftime("%A %d %B");
+         // si matin $time = true, si apres midi $time = false
+         if ($time === true) // matin 
          {  
-              $date->setMatin(1);
-              $em->flush();            
-         } else { 
-             echo 'déjà inscrit pour ce matin';
+              if ($AM['matin'] != 1){
+              $date[0]->setMatin(1);
+              $em->flush();
+              $response = ["server"=>"echec",
+                          "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
+                         ];  
+              return json_encode($response,JSON_UNESCAPED_UNICODE);           
+             } else { 
+             $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." matin, Merci."
+                         ];               
+            return json_encode($response,JSON_UNESCAPED_UNICODE);
+           }
          } 
-         if ($time === false && $PM['apresmidi'] != 1){ //apres midi
-            $date->setApresMidi(1);
+         if ($time === false){ //apres midi
+            if($PM['apresmidi'] != 1){
+            $date[0]->setApresMidi(1);
             $em->flush();
+            $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
+                         ];
+            return json_encode($response,JSON_UNESCAPED_UNICODE);
+            } else {
+             $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
+                         ];
+            return json_encode($response, JSON_UNESCAPED_UNICODE);
+           }
+        }
+     }
+     public function pushToDB($time, $infoEleve, $currentDate)
+     {
+         var_dump($currentDate);
+         $eleveID = $infoEleve->id;
+         $signIn = new Signin();
+         $signIn->getId($eleveID);
+         $signIn->setDate($currentDate);
+         if($time === true) 
+         {
+
+            $signIn->setMatin(1);
+            $signIn->setApresMidi(0);
+               
          } else {
-             echo 'déjà inscrit pour cette après midi';
+            $signIn->setMatin(0);
+            $signIn->setApresMidi(1);
          }
+         $em = $this->getDoctrine()->getManager();
+         $em->persist($signIn);
+         $em->flush();
      }
      private function getEntities( $entityType ):array
     {
