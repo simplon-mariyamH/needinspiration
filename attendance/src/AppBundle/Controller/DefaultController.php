@@ -1,6 +1,7 @@
 <?php
 namespace AppBundle\Controller;
 use AppBundle\Entity\Login;
+use AppBundle\Entity\Signin;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
@@ -107,13 +108,22 @@ class DefaultController extends Controller
                   "id"=>$id)
         );
         if (isset($checkDate) && count($checkDate) >= 1){
-            var_dump($checkDate);
+            // var_dump($checkDate);
             $PmOrAm = $this->PmOrAm();
-            $this->updateDataBase($PmOrAm);
-            echo 'cette date existe déjà';
+            return $this->updateDataBase($PmOrAm, $checkDate);
+            
             
         } else {
-            echo 'cette date n\'existe pas';
+            echo ' cette date n\'existe pas';
+            var_dump($checkDate);
+            $PmOrAm = $this->PmOrAm();
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
+            $eleve = $repository->findOneBy(
+                array("id"=>$id)
+            );
+            // function insert base de données la date presente.
+            $this->pushToDB($PmOrAm, $eleve, $currentDate);
+            var_dump($checkDate);
         }
      }
      public function PmOrAm()
@@ -125,9 +135,66 @@ class DefaultController extends Controller
          }
 
      }
-     public function updateDataBase($time)
+     public function updateDataBase($time, $date)
+     {   
+         setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
+         $em = $this->getDoctrine()->getManager();
+         $AM = ['matin' => $date[0]->getMatin()];
+         $PM = ['apresmidi' => $date[0]->getApresMidi()];
+         $dateNow = strftime("%A %d %B");
+         // si matin $time = true, si apres midi $time = false
+         if ($time === true) // matin 
+         {  
+              if ($AM['matin'] != 1){
+              $date[0]->setMatin(1);
+              $em->flush();
+              $response = ["server"=>"echec",
+                          "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
+                         ];  
+              return json_encode($response,JSON_UNESCAPED_UNICODE);           
+             } else { 
+             $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." matin, Merci."
+                         ];               
+            return json_encode($response,JSON_UNESCAPED_UNICODE);
+           }
+         } 
+         if ($time === false){ //apres midi
+            if($PM['apresmidi'] != 1){
+            $date[0]->setApresMidi(1);
+            $em->flush();
+            $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
+                         ];
+            return json_encode($response,JSON_UNESCAPED_UNICODE);
+            } else {
+             $response = ["server"=>"echec",
+                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
+                         ];
+            return json_encode($response, JSON_UNESCAPED_UNICODE);
+           }
+        }
+     }
+     public function pushToDB($time, $infoEleve, $currentDate)
      {
-         var_dump($time);
+         var_dump($currentDate);
+         $eleveID = $infoEleve->id;
+         $signIn = new Signin();
+         $signIn->getId($eleveID);
+         $signIn->setDate($currentDate);
+         if($time === true) 
+         {
+
+            $signIn->setMatin(1);
+            $signIn->setApresMidi(0);
+               
+         } else {
+            $signIn->setMatin(0);
+            $signIn->setApresMidi(1);
+         }
+         $em = $this->getDoctrine()->getManager();
+         $em->persist($signIn);
+         $em->flush();
      }
      private function getEntities( $entityType ):array
     {
