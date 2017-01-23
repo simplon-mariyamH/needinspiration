@@ -119,14 +119,14 @@ class DefaultController extends Controller
             $eleve = $repository->findOneBy(
                 array("id"=>$id)
             );
-            // function insert base de données la date presente.
+            // function insert base de données la date présente.
             $this->pushToDB($PmOrAm, $eleve, $currentDate);
             $response =  ["server"=>"success",
-                          "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
+                          "message"=>"Votre inscription pour le".strftime("%A %d %B")." matin a bien été prise en compte, Merci."
                          ];
 
         }
-        return $response;
+        return json_encode($response, JSON_UNESCAPED_UNICODE);
      }
      public function PmOrAm()
      {
@@ -153,12 +153,12 @@ class DefaultController extends Controller
               $message = ["server"=>"success",
                           "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
                          ];  
-              $response = json_encode($message,JSON_UNESCAPED_UNICODE);           
+              $response = $message;           
              } else { 
              $message = ["server"=>"echec",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." matin, Merci."
                          ];               
-            $response = json_encode($message,JSON_UNESCAPED_UNICODE);
+            $response = $message;
            }
          } 
          if ($time === false){ //apres midi
@@ -168,12 +168,12 @@ class DefaultController extends Controller
             $message = ["server"=>"success",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
                          ];
-            $response = json_encode($message,JSON_UNESCAPED_UNICODE);
+            $response = $message;
             } else {
              $message = ["server"=>"echec",
                           "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
                          ];
-            $response = json_encode($message, JSON_UNESCAPED_UNICODE);
+            $response = $message;
            }
         }
         return $response;
