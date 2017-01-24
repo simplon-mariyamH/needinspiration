@@ -29,38 +29,45 @@ class DefaultController extends Controller
     /**
      * @Route("/Promo", name="Promo")
      */
-    public function getHolidays($year = null)
+    public function getHolidays(Request $request)
     {
-        if ($year === null)
+        if ($request)
         {
-            $year = intval(date('Y'));
+
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Promo');
+            $year = $repository->findOneBy(
+                array('debut_promo' => $debut_promo , 'fin_promo' => $fin_promo)
+            if ($year === null)
+            {
+                $year = intval(date('Y'));
+            }
+
+            $easterDate  = easter_date($year);
+            $easterDay   = date('j', $easterDate);
+            $easterMonth = date('n', $easterDate);
+            $easterYear   = date('Y', $easterDate);
+
+            $holidays = array(
+                // Dates fixes
+                mktime(0, 0, 0, 1,  1,  $year),  // 1er janvier
+                mktime(0, 0, 0, 5,  1,  $year),  // Fête du travail
+                mktime(0, 0, 0, 5,  8,  $year),  // Victoire des alliés
+                mktime(0, 0, 0, 7,  14, $year),  // Fête nationale
+                mktime(0, 0, 0, 8,  15, $year),  // Assomption
+                mktime(0, 0, 0, 11, 1,  $year),  // Toussaint
+                mktime(0, 0, 0, 11, 11, $year),  // Armistice
+                mktime(0, 0, 0, 12, 25, $year),  // Noel
+
+                // Dates variables
+                mktime(0, 0, 0, $easterMonth, $easterDay + 1,  $easterYear),
+                mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear),
+                mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear),
+            );
+
+            sort($holidays);
+
+            return $holidays;
         }
-
-        $easterDate  = easter_date($year);
-        $easterDay   = date('j', $easterDate);
-        $easterMonth = date('n', $easterDate);
-        $easterYear   = date('Y', $easterDate);
-
-        $holidays = array(
-            // Dates fixes
-            mktime(0, 0, 0, 1,  1,  $year),  // 1er janvier
-            mktime(0, 0, 0, 5,  1,  $year),  // Fête du travail
-            mktime(0, 0, 0, 5,  8,  $year),  // Victoire des alliés
-            mktime(0, 0, 0, 7,  14, $year),  // Fête nationale
-            mktime(0, 0, 0, 8,  15, $year),  // Assomption
-            mktime(0, 0, 0, 11, 1,  $year),  // Toussaint
-            mktime(0, 0, 0, 11, 11, $year),  // Armistice
-            mktime(0, 0, 0, 12, 25, $year),  // Noel
-
-            // Dates variables
-            mktime(0, 0, 0, $easterMonth, $easterDay + 1,  $easterYear),
-            mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear),
-            mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear),
-        );
-
-        sort($holidays);
-
-        return $holidays;
     }
 
     /**
@@ -105,6 +112,14 @@ class DefaultController extends Controller
     //     $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
     //     $json = $serializer->serialize($object, 'json', ['json_encode_options' => JSON_UNESCAPED_SLASHES]);
     //     return $json;
+
+    // }
+
+    //Ce que moi j'aurais fait jai modifié app/config/confin.yml pour activer serializer et service.yml
+    //public function ObjectToJson($object)
+    // {
+    //    $serializer = $this->get('serializer');
+    //    $json = $serializer->serialize( $object, 'json', array('json' => new JsonEncoder());
     // }
        /**
      * @Route("/Signin", name="Signin")
