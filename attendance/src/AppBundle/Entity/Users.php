@@ -5,12 +5,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Login
+ * Users
  *
  * @ORM\Table(name="users")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\LoginRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\UsersRepository")
  */
-class Login
+class Users
 {
     /**
      * @var int
@@ -65,7 +65,7 @@ class Login
      *
      * @param string $nom
      *
-     * @return Login
+     * @return Users
      */
     public function setNom($nom)
     {
@@ -89,7 +89,7 @@ class Login
      *
      * @param string $prenom
      *
-     * @return Login
+     * @return Users
      */
     public function setPrenom($prenom)
     {
@@ -113,7 +113,7 @@ class Login
      *
      * @param string $motdepasse
      *
-     * @return Login
+     * @return Users
      */
     public function setMotdepasse($motdepasse)
     {
@@ -136,7 +136,7 @@ class Login
      *
      * @param string $email
      *
-     * @return Login
+     * @return Users
      */
     public function setEmail($email)
     {
