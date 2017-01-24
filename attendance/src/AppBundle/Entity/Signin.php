@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
  * Signin
  *
@@ -12,6 +13,11 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Signin
 {
+    /**
+     * @ORM\ManyToOne(targetEntity="Student", inversedBy="signatures")
+     * @ORM\JoinColumn(name="id_users", referencedColumnName="id")
+     */
+    private $student;
     /**
      * @var int
      *

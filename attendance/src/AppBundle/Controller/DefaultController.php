@@ -1,6 +1,6 @@
 <?php
 namespace AppBundle\Controller;
-use AppBundle\Entity\Users;
+use AppBundle\Entity\Student;
 use AppBundle\Entity\Signin;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -26,7 +26,7 @@ class DefaultController extends Controller
         return new Response(var_dump($students));
     }
     /**
-     * @Route("/Users", name="Users")
+     * @Route("/Student", name="Student")
      */
     public function checkId(Request $request)
     {
@@ -35,7 +35,7 @@ class DefaultController extends Controller
             if (isset($_POST["email"]) && isset($_POST["motdepasse"])){
             $email = $_POST["email"];
             $motdepasse = $_POST["motdepasse"];
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
             $eleve = $repository->findOneBy(
             array('email' => $email , 'motdepasse' => $motdepasse)
             );
@@ -71,7 +71,7 @@ class DefaultController extends Controller
         {
             if(isset($_POST["id"])){
                 $id = $_POST["id"];
-                $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
+                $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
                 $eleve = $repository->findOneBy(
                 array("id"=>$id)
                 );
@@ -89,7 +89,7 @@ class DefaultController extends Controller
 
         }
      } 
-     private function alreadySignedInOrNot( $id) 
+     private function alreadySignedInOrNot($id) 
      {
         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
         $now = new \DateTime('now');
@@ -103,7 +103,7 @@ class DefaultController extends Controller
             $response = $this->updateDataBase($PmOrAm, $checkDate);  
         } else {
             $PmOrAm = $this->PmOrAm();
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
             $eleve = $repository->findOneBy(
                 array("id"=>$id)
             );
