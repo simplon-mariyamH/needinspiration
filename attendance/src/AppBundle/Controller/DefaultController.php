@@ -1,6 +1,6 @@
 <?php
 namespace AppBundle\Controller;
-use AppBundle\Entity\Login;
+use AppBundle\Entity\Users;
 use AppBundle\Entity\Signin;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
- setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
+setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
  $_POST['email'] = "Test_email";
  $_POST['motdepasse'] = "Test_motdepasse";
  $_POST["id"] = 1;
@@ -22,11 +22,11 @@ class DefaultController extends Controller
      */
     public function indexAction(Request $request)
     {
-        $students = $this->getEntities('AppBundle:Login');
+        $students = $this->getEntities('AppBundle:Signin');
         return new Response(var_dump($students));
     }
     /**
-     * @Route("/Login", name="Login")
+     * @Route("/Users", name="Users")
      */
     public function checkId(Request $request)
     {
@@ -35,7 +35,7 @@ class DefaultController extends Controller
             if (isset($_POST["email"]) && isset($_POST["motdepasse"])){
             $email = $_POST["email"];
             $motdepasse = $_POST["motdepasse"];
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
             $eleve = $repository->findOneBy(
             array('email' => $email , 'motdepasse' => $motdepasse)
             );
@@ -71,7 +71,7 @@ class DefaultController extends Controller
         {
             if(isset($_POST["id"])){
                 $id = $_POST["id"];
-                $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
+                $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
                 $eleve = $repository->findOneBy(
                 array("id"=>$id)
                 );
@@ -89,7 +89,7 @@ class DefaultController extends Controller
 
         }
      } 
-     public function alreadySignedInOrNot( $id) 
+     private function alreadySignedInOrNot( $id) 
      {
         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
         $now = new \DateTime('now');
@@ -103,7 +103,7 @@ class DefaultController extends Controller
             $response = $this->updateDataBase($PmOrAm, $checkDate);  
         } else {
             $PmOrAm = $this->PmOrAm();
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
+            $repository = $this->getDoctrine()->getRepository('AppBundle:Users');
             $eleve = $repository->findOneBy(
                 array("id"=>$id)
             );
@@ -117,7 +117,7 @@ class DefaultController extends Controller
         }
         return json_encode($response, JSON_UNESCAPED_UNICODE);
      }
-     public function PmOrAm()
+     private function PmOrAm()
      {
          if (date('H') < 12) {
             return  $AM = true;
@@ -126,7 +126,7 @@ class DefaultController extends Controller
          }
 
      }
-     public function updateDataBase($time, $date)
+     private function updateDataBase($time, $date)
      {   
          
          $em = $this->getDoctrine()->getManager();
@@ -167,7 +167,7 @@ class DefaultController extends Controller
         }
         return $response;
      }
-     public function pushToDB($time, $infoEleve, $currentDate)
+     private function pushToDB($time, $infoEleve, $currentDate)
      {
          $eleveID = $infoEleve->id;
          $signIn = new Signin();
@@ -186,6 +186,20 @@ class DefaultController extends Controller
          $em->persist($signIn);
          $em->flush();
      }
+       /**
+     * @Route("/Todaysignatures", name="Todaysignatures")
+     */
+     public function Todaysignatures()
+     {   
+         $now = new \DateTime('now');
+         $todayDate = new \Datetime($now->format('Y-m-d').' 00:00:00.000000');
+         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
+         $attendants = $repository->findBy(
+             array("date"=>$todayDate)
+         );
+         var_dump($attendants);
+     }
+
      private function getEntities( $entityType ):array
     {
         $entityManager = $this->getDoctrine()->getManager();
