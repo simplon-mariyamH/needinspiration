@@ -24,7 +24,7 @@ class Signin
     /**
      * @var int
      *
-     * @ORM\Column(name="id_users", type="integer", unique=true)
+     * @ORM\Column(name="id_users", type="integer")
      */
     private $idUsers;
 

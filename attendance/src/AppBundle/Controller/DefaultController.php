@@ -10,7 +10,7 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
-
+ setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
  $_POST['email'] = "Test_email";
  $_POST['motdepasse'] = "Test_motdepasse";
  $_POST["id"] = 1;
@@ -99,13 +99,6 @@ class DefaultController extends Controller
             }      
         } 
     }
-    // TODO METTRE SERIALIZER DANS USER ET CREE UNE FONCTION OBJECT TO JSON $this=>objectToJson
-    // public function objectToJson($object)
-    // {
-    //     $serializer = new Serializer(array(new GetSetMethodNormalizer()), array('json' => new JsonEncoder()));
-    //     $json = $serializer->serialize($object, 'json', ['json_encode_options' => JSON_UNESCAPED_SLASHES]);
-    //     return $json;
-    // }
        /**
      * @Route("/Signin", name="Signin")
      */
@@ -133,8 +126,6 @@ class DefaultController extends Controller
             }
 
         }
-
-
      } 
      public function alreadySignedInOrNot( $id) 
      {
@@ -146,11 +137,8 @@ class DefaultController extends Controller
                   "idUsers"=>$id)
         );
         if (count($checkDate)>= 1 && $checkDate != null){
-            
             $PmOrAm = $this->PmOrAm();
-            $response = $this->updateDataBase($PmOrAm, $checkDate);
-            
-            
+            $response = $this->updateDataBase($PmOrAm, $checkDate);  
         } else {
             $PmOrAm = $this->PmOrAm();
             $repository = $this->getDoctrine()->getRepository('AppBundle:Login');
@@ -158,9 +146,10 @@ class DefaultController extends Controller
                 array("id"=>$id)
             );
             // function insert base de données la date présente.
+            $moment = ($PmOrAm === true) ? " matin" : " après-midi";
             $this->pushToDB($PmOrAm, $eleve, $currentDate);
             $response =  ["server"=>"success",
-                          "message"=>"Votre inscription pour le".strftime("%A %d %B")." matin a bien été prise en compte, Merci."
+                          "message"=>"Votre inscription pour le ".strftime("%A %d %B").$moment." a bien été prise en compte, Merci."
                          ];
 
         }
@@ -177,7 +166,7 @@ class DefaultController extends Controller
      }
      public function updateDataBase($time, $date)
      {   
-         setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
+         
          $em = $this->getDoctrine()->getManager();
          $AM = ['matin' => $date[0]->getMatin()];
          $PM = ['apresmidi' => $date[0]->getApresMidi()];
@@ -189,7 +178,7 @@ class DefaultController extends Controller
               $date[0]->setMatin(1);
               $em->flush();
               $message = ["server"=>"success",
-                          "message"=>"Votre inscription pour le".$dateNow." matin a bien été prise en compte, Merci."
+                          "message"=>"Votre inscription pour le ".$dateNow." matin a bien été prise en compte, Merci."
                          ];  
               $response = $message;           
              } else { 
@@ -204,7 +193,7 @@ class DefaultController extends Controller
             $date[0]->setApresMidi(1);
             $em->flush();
             $message = ["server"=>"success",
-                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
+                          "message"=>"Votre inscription pour le ".$dateNow." après-midi a bien été prise en compte, Merci."
                          ];
             $response = $message;
             } else {
