@@ -13,7 +13,9 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
  $_POST['email'] = "Test_email";
  $_POST['motdepasse'] = "Test_motdepasse";
- $_POST["id"] = 1;
+ $_POST["id"] = 2;
+ 
+
 
 class DefaultController extends Controller
 {
@@ -191,14 +193,38 @@ class DefaultController extends Controller
      */
      public function Todaysignatures()
      {   
+         $response = [];
          $now = new \DateTime('now');
          $todayDate = new \Datetime($now->format('Y-m-d').' 00:00:00.000000');
          $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
          $attendants = $repository->findBy(
              array("date"=>$todayDate)
          );
-         var_dump($attendants);
+    
+         foreach($attendants as $student){
+            $todayStudent = [];
+            foreach ($student as $key=>$value) {
+                    $todayStudent[$key] = $value;
+            }
+             $userId = $student->idUsers;
+             $fetchNames = $this->linkFirstLastName($userId);
+             array_push($todayStudent, $fetchNames);
+             array_push($studentAttendance, $todayStudent);
+         }
+         return json_encode($response);
+         
      }
+  public function linkFirstLastName($id)
+  {
+    $em = $this->getDoctrine()->getManager();
+    $todayStudent = $em->getRepository('AppBundle:Student')->find($id);
+    $studentName = ["nom"=>$todayStudent->nom, "prenom"=>$todayStudent->prenom];
+    if (null === $todayStudent) {
+      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
+    }
+    $em->flush();
+    return $studentName;
+  }
 
      private function getEntities( $entityType ):array
     {

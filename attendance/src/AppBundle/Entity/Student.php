@@ -11,12 +11,8 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="AppBundle\Repository\StudentRepository")
  */
 class Student
-{
-    /**
-    * @ORM\OneToMany(targetEntity="Signin", mappedBy="student")
-    */
-    private $signatures;
-    
+{ 
+ 
     /**
      * @var int
      *
