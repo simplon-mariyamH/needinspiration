@@ -4,6 +4,7 @@ namespace AppBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+
 /**
  * Signin
  *
@@ -12,6 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Signin
 {
+   
     /**
      * @var int
      *
@@ -19,35 +21,35 @@ class Signin
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    private $id;
+    public $id;
 
     /**
      * @var int
      *
      * @ORM\Column(name="id_users", type="integer")
      */
-    private $idUsers;
+    public $idUsers;
 
     /**
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="datetime")
      */
-    private $date;
+    public $date;
 
     /**
      * @var int
      *
      * @ORM\Column(name="matin", type="integer")
      */
-    private $matin;
+    public $matin;
 
     /**
      * @var int
      *
      * @ORM\Column(name="apres_midi", type="integer")
      */
-    private $apresMidi;
+    public $apresMidi;
 
     /**
      * Set idUsers

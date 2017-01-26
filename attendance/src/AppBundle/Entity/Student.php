@@ -5,13 +5,14 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Users
+ * Student
  *
  * @ORM\Table(name="users")
- * @ORM\Entity(repositoryClass="AppBundle\Repository\UsersRepository")
+ * @ORM\Entity(repositoryClass="AppBundle\Repository\StudentRepository")
  */
-class Users
-{
+class Student
+{ 
+ 
     /**
      * @var int
      *
@@ -65,7 +66,7 @@ class Users
      *
      * @param string $nom
      *
-     * @return Users
+     * @return Student
      */
     public function setNom($nom)
     {
@@ -89,7 +90,7 @@ class Users
      *
      * @param string $prenom
      *
-     * @return Users
+     * @return Student
      */
     public function setPrenom($prenom)
     {
@@ -113,7 +114,7 @@ class Users
      *
      * @param string $motdepasse
      *
-     * @return Users
+     * @return Student
      */
     public function setMotdepasse($motdepasse)
     {
@@ -136,7 +137,7 @@ class Users
      *
      * @param string $email
      *
-     * @return Users
+     * @return Student
      */
     public function setEmail($email)
     {
