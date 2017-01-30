@@ -10,265 +10,174 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 
-setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
- $_POST['email'] = "Test_email";
- $_POST['motdepasse'] = "Test_motdepasse";
- $_POST["id"] = 2;
- 
+
+date_default_timezone_set('Europe/Paris');
+// date_default_timezone_set('America/Los_Angeles');
+
 
 
 class DefaultController extends Controller
 {
-    /**
-     * @Route("/", name="homepage")
-     */
-    public function indexAction(Request $request)
-    {
-        $students = $this->getEntities('AppBundle:Signin');
-        return new Response(var_dump($students));
-    }
+  private $now;
+  private $meridiem;
 
-    /**
-     * @Route("/Promo", name="Promo")
-     */
-    public function getHolidays($year = null)
-    {
-        if ($year === null)
-        {
-            $year = intval(date('Y'));
-        }
 
-        $easterDate  = easter_date($year);
-        $easterDay   = date('j', $easterDate);
-        $easterMonth = date('n', $easterDate);
-        $easterYear   = date('Y', $easterDate);
+  private $student;
+  private $signin;
 
-        $holidays = array(
-            // Dates fixes
-            mktime(0, 0, 0, 1,  1,  $year),  // 1er janvier
-            mktime(0, 0, 0, 5,  1,  $year),  // Fête du travail
-            mktime(0, 0, 0, 5,  8,  $year),  // Victoire des alliés
-            mktime(0, 0, 0, 7,  14, $year),  // Fête nationale
-            mktime(0, 0, 0, 8,  15, $year),  // Assomption
-            mktime(0, 0, 0, 11, 1,  $year),  // Toussaint
-            mktime(0, 0, 0, 11, 11, $year),  // Armistice
-            mktime(0, 0, 0, 12, 25, $year),  // Noel
-
-            // Dates variables
-            mktime(0, 0, 0, $easterMonth, $easterDay + 1,  $easterYear),
-            mktime(0, 0, 0, $easterMonth, $easterDay + 39, $easterYear),
-            mktime(0, 0, 0, $easterMonth, $easterDay + 50, $easterYear),
-        );
-
-        sort($holidays);
-
-        return $holidays;
-    }
-
-    /**
-     * @Route("/Student", name="Student")
-     */
-    public function checkId(Request $request)
-    {
-        if ($request) 
-        {
-            if (isset($_POST["email"]) && isset($_POST["motdepasse"])){
-            $email = $_POST["email"];
-            $motdepasse = $_POST["motdepasse"];
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
-            $eleve = $repository->findOneBy(
-            array('email' => $email , 'motdepasse' => $motdepasse)
-            );
-            if ($eleve === null)
-            {
-                $echec = array('server' => 'echec');
-                return new Response(json_encode($echec));
-            } else {
-                $user = [];
-                foreach ($eleve as $key=>$value) {
-                    $user[$key] = $value;
-                }
-                $response = [
-                    "server"=>"success", 
-                    "user"=>$user];
-                return new Response(json_encode($response));
-               
-                
-              }
-            } else {
-                $response = [ "server"=>"echec"];
-                return new Response(json_encode($response));
-            }      
-        } 
-    }
-       /**
-     * @Route("/Signin", name="Signin")
-     */
-     public function signIn(Request $request)
-     {
-        // id verif si existe et ugrade la base de données. gerer si l'utilisateur a dejà signé.
-        if ($request) 
-        {
-            if(isset($_POST["id"])){
-                $id = $_POST["id"];
-                $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
-                $eleve = $repository->findOneBy(
-                array("id"=>$id)
-                );
-                if(isset($eleve))
-                {
-                $signedIn = $this->alreadySignedInOrNot($id);
-                    return new Response($signedIn);
-                } else {
-                    return new Response("élève inconnu");
-                }
-
-            } else {
-                return new Response("ID manquant");
-            }
-
-        }
-     } 
-     private function alreadySignedInOrNot($id) 
-     {
-        $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
-        $now = new \DateTime('now');
-        $currentDate = new \DateTime( $now->format('Y-m-d').' 00:00:00.000000');
-        $checkDate = $repository->findby(
-            array("date"=>$currentDate,
-                  "idUsers"=>$id)
-        );
-        if (count($checkDate)>= 1 && $checkDate != null){
-            $PmOrAm = $this->PmOrAm();
-            $response = $this->updateDataBase($PmOrAm, $checkDate);  
-        } else {
-            $PmOrAm = $this->PmOrAm();
-            $repository = $this->getDoctrine()->getRepository('AppBundle:Student');
-            $eleve = $repository->findOneBy(
-                array("id"=>$id)
-            );
-            // function insert base de données la date présente.
-            $moment = ($PmOrAm === true) ? " matin" : " après-midi";
-            $this->pushToDB($PmOrAm, $eleve, $currentDate);
-            $response =  ["server"=>"success",
-                          "message"=>"Votre inscription pour le ".strftime("%A %d %B").$moment." a bien été prise en compte, Merci."
-                         ];
-
-        }
-        return json_encode($response, JSON_UNESCAPED_UNICODE);
-     }
-     private function PmOrAm()
-     {
-         if (date('H') < 12) {
-            return  $AM = true;
-         } else {
-             return $AM = false;
-         }
-
-     }
-     private function updateDataBase($time, $date)
-     {   
-         
-         $em = $this->getDoctrine()->getManager();
-         $AM = ['matin' => $date[0]->getMatin()];
-         $PM = ['apresmidi' => $date[0]->getApresMidi()];
-         $dateNow = strftime("%A %d %B");
-         // si matin $time = true, si apres midi $time = false
-         if ($time === true) // matin 
-         {  
-              if ($AM['matin'] != 1){
-              $date[0]->setMatin(1);
-              $em->flush();
-              $message = ["server"=>"success",
-                          "message"=>"Votre inscription pour le ".$dateNow." matin a bien été prise en compte, Merci."
-                         ];  
-              $response = $message;           
-             } else { 
-             $message = ["server"=>"echec",
-                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." matin, Merci."
-                         ];               
-            $response = $message;
-           }
-         } 
-         if ($time === false){ //apres midi
-            if($PM['apresmidi'] != 1){
-            $date[0]->setApresMidi(1);
-            $em->flush();
-            $message = ["server"=>"success",
-                          "message"=>"Votre inscription pour le ".$dateNow." après-midi a bien été prise en compte, Merci."
-                         ];
-            $response = $message;
-            } else {
-             $message = ["server"=>"echec",
-                          "message"=>"Vous êtes déjà inscrit pour le ".$dateNow." après-midi, Merci."
-                         ];
-            $response = $message;
-           }
-        }
-        return $response;
-     }
-     private function pushToDB($time, $infoEleve, $currentDate)
-     {
-         $eleveID = $infoEleve->id;
-         $signIn = new Signin();
-         $signIn->setIdUsers($eleveID);
-         $signIn->setDate($currentDate);
-         if($time === true) 
-         {
-            $signIn->setMatin(1);
-            $signIn->setApresMidi(0);
-               
-         } else {
-            $signIn->setMatin(0);
-            $signIn->setApresMidi(1);
-         }
-         $em = $this->getDoctrine()->getManager();
-         $em->persist($signIn);
-         $em->flush();
-     }
-       /**
-     * @Route("/Todaysignatures", name="Todaysignatures")
-     */
-     public function Todaysignatures()
-     {   
-         $response = [];
-         $now = new \DateTime('now');
-         $todayDate = new \Datetime($now->format('Y-m-d').' 00:00:00.000000');
-         $repository = $this->getDoctrine()->getRepository('AppBundle:Signin');
-         $attendants = $repository->findBy(
-             array("date"=>$todayDate)
-         );
-    
-         foreach($attendants as $student){
-            $todayStudent = [];
-            foreach ($student as $key=>$value) {
-                    $todayStudent[$key] = $value;
-            }
-             $userId = $student->idUsers;
-             $fetchNames = $this->linkFirstLastName($userId);
-             array_push($todayStudent, $fetchNames);
-             array_push($studentAttendance, $todayStudent);
-         }
-         return json_encode($response);
-         
-     }
-  public function linkFirstLastName($id)
+  function __construct()
   {
-    $em = $this->getDoctrine()->getManager();
-    $todayStudent = $em->getRepository('AppBundle:Student')->find($id);
-    $studentName = ["nom"=>$todayStudent->nom, "prenom"=>$todayStudent->prenom];
-    if (null === $todayStudent) {
-      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
-    }
-    $em->flush();
-    return $studentName;
+    // $this->now = new \Datetime('now');
+    $this->now = new \Datetime('2017-01-15 00:00:00.000000');
+    $this->meridiem = $this->now->format('A');
   }
 
-     private function getEntities( $entityType ):array
-    {
-        $entityManager = $this->getDoctrine()->getManager();
-        return $entityManager->getRepository($entityType)->findAll();
+
+  /**
+   * @Route("/", name="homepage")
+   */
+  public function indexAction(Request $request)
+  {
+    return new Response('HOME');
+  }
+
+  /**
+   * @Route("/daily-sign", name="daily-sign")
+   * Recupération de toutes les signatures.
+   */
+  public function DailySignAction()
+  {
+    $repo = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('AppBundle:Signin');
+    $allSign = $repo->findAll();
+
+    return new Response(json_encode($allSign));
+
+  }
+
+  /**
+   * @Route("/admin/get/signature/today", name="signature-today")
+   * @return Response
+   */
+  public function getSignatureForToday()
+  {
+    $signatures = $this->getDoctrine()->getManager()
+      ->getRepository('AppBundle:Signin')
+      ->findBy( array( 'date' => $this->now ));
+
+    // var_dump($signature->getStudent());
+    // $signaturesToday = [];
+    foreach ($signatures as $signature) {
+      // var_dump($signature);
+      $signaturesToday[] = [
+        "id" => $signature->id,
+        "date" => $signature->date->format('Y-m-d'),
+        // "date" => explode(" " ,$signature->date->date)[0]
+        "matin" => (isset($signature->matin)) ? $signature->matin : null,
+        "apres_midi" => (isset($signature->apres_midi)) ? $signature->apres_midi : null,
+        "student_id" => $signature->getStudent()->getId()
+      ];
     }
+    var_dump($signaturesToday);
+    return new Response('OK');
+  }
+
+
+
+  /**
+   * @Route("/auth-student", name="auth-student")
+   */
+  public function AuthStudent()
+  {
+    $critere = [
+      "name"=> $_POST['name'] ,
+      "lastname"=> $_POST['lastname'],
+      "password"=> $_POST['password']
+    ];
+    $em = $this->getDoctrine()->getManager();
+    $student = $em->getRepository('AppBundle:Student')->findBy($critere);
+    if ( !empty($student) ) {
+      $student = $student[0];
+      if(!$this->checkIfAlreadySigned($student)) {
+        $this->dailySignNowAction($student);
+        $res = [ "server" => "signed", "msg" => "studend have been signed" ];
+      } else {
+        if($this->meridiem === 'AM' AND $this->signin->matin === 0) {
+          $this->signin->setMatin(1);
+          $res = [ 'server'=>'signed', 'msg'=>"have been signed for matin" ];
+        } elseif($this->meridiem === 'AM' AND $this->signin->matin === 1) {
+          $res = [ 'server'=>'fail', 'msg'=>"already been signed for matin" ];
+        }
+        if($this->meridiem === 'PM' AND ($this->signin->apresMidi === null || 0))
+        {
+          $this->signin->setApresMidi(1);
+          $res = [ 'server'=>'signed', 'msg'=>"have been signed for apres midi" ];
+        } elseif($this->meridiem === 'PM' AND $this->signin->apresMidi === 1) {
+          $res = [ 'server'=>'fail', 'msg'=>"already signed for apres midi" ];
+        }
+        $em->flush();
+      }
+    } else { $res = [ "server" => "echec", "msg" => "incorrect username or password" ]; }
+
+
+    /*$template = $this
+      ->get('templating')
+      ->render('AppBundle:Default:index.html.twig',
+        array('json' => json_encode($res)));
+    return new Response($template);*/
+    return new Response(json_encode($res));
+  }
+
+
+      /* Signe la presence de l'etudiant */
+      private function dailySignNowAction($student)
+      {
+        $em = $this->getDoctrine()->getManager();
+        $sign = new Signin();
+        $sign->setDate(new \Datetime($this->now->format('Y-m-d').' 00:00:00.000000'));
+        if ($this->meridiem === 'AM') { $sign->setMatin(1); }
+        if ($this->meridiem === 'PM') { $sign->setApresMidi(1); }
+        $sign->setStudent($student);
+
+        $em->persist($sign);
+        $em->flush();
+      }
+      /*
+       * Verifie si l'etudiant a déja signé pour la période déterminer (AM/PM)
+       * Retourne un booléen
+       * Si le booléen vaut 'true' alors la fonction stock la signature dans
+       *    une propriété
+       */
+      private function checkIfAlreadySigned($student)
+      {
+        $em = $this->getDoctrine()->getManager();
+        $critere = $this->createDate();
+        $critere['student'] = $student;
+
+        $signin = $em->getRepository('AppBundle:Signin')
+          ->findBy( $critere );
+
+        if(isset($signin) && (count($signin) > 0) ) {$this->signin = $signin[0];}
+        return (count($signin) > 0) ? true : false;
+      }
+      /*
+       * Créer un tableau associatif correspondant a la période
+       *    de la journée et le retourne
+       */
+      private function createDate()
+      {
+
+        $date = new \Datetime($this->now->format('Y-m-d').' 00:00:00.000000');
+        /*if ($this->meridiem === 'AM') {
+          $res = ['date' => $date, 'matin' => 1];
+        } else {
+          $res = ['date' => $date, 'apresMidi' => 1];
+        }
+        $res = ['date' => $date, 'apresMidi' => 1];
+        return $res;*/
+        return ['date'=>$date];
+      }
 }
 
  

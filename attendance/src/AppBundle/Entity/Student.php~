@@ -187,18 +187,4 @@ class Student
     {
         return $this->promo_id;
     }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Student
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
 }
