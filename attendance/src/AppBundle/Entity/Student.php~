@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Student
  *
- * @ORM\Table(name="student")
+ * @ORM\Table(name="Student")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\StudentRepository")
  */
 class Student
@@ -186,19 +186,5 @@ class Student
     public function getPromoId()
     {
         return $this->promo_id;
-    }
-
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Student
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
     }
 }
