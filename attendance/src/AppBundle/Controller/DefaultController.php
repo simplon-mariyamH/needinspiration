@@ -62,12 +62,16 @@ class DefaultController extends Controller
    */
   public function getSignatureForToday()
   {
+    $students = $this->getDoctrine()->getManager()
+      ->getRepository('AppBundle:Student')
+      ->findAll();
+
     $signatures = $this->getDoctrine()->getManager()
       ->getRepository('AppBundle:Signin')
       ->findBy( array( 'date' => $this->now ));
 
     // var_dump($signature->getStudent());
-    // $signaturesToday = [];
+    $signaturesToday = [];
     foreach ($signatures as $signature) {
       // var_dump($signature);
       $signaturesToday[] = [
@@ -75,15 +79,32 @@ class DefaultController extends Controller
         "date" => $signature->date->format('Y-m-d'),
         // "date" => explode(" " ,$signature->date->date)[0]
         "matin" => (isset($signature->matin)) ? $signature->matin : null,
-        "apres_midi" => (isset($signature->apres_midi)) ? $signature->apres_midi : null,
+        "apres_midi" => (isset($signature->apresMidi)) ? $signature->apresMidi : null,
         "student_id" => $signature->getStudent()->getId()
       ];
     }
-    var_dump($signaturesToday);
-    return new Response('OK');
+
+    $res = [
+      "signatures" => $signaturesToday,
+      "students" => $students
+      ];
+    // var_dump($signaturesToday);
+    return new Response(json_encode($res));
   }
 
-  
+  /**
+   * @Route("/admin/get/all-students", name="all-students")
+   */
+  public function getAllStudents()
+  {
+    $students = $this->getDoctrine()->getManager()
+      ->getRepository('AppBundle:Student')
+      ->findAll();
+
+    return new Response(json_encode($students));
+  }
+
+
 
   /**
    * @Route("/auth-student", name="auth-student")
