@@ -83,7 +83,7 @@ class DefaultController extends Controller
     return new Response('OK');
   }
 
-
+  
 
   /**
    * @Route("/auth-student", name="auth-student")
